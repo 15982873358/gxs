@@ -1,0 +1,4 @@
+<?php
+//000000000000
+ exit();?>
+think_serialize:a:18:{s:4:"type";s:1:"1";s:9:"accessKey";s:40:"dqi1EkKkxsQf7WW9ak_xwBTSzFrjfaFyNknm0I28";s:10:"secrectKey";s:40:"lXGHIR_nJvNjAzxYp0pessPsZJdAYDF7x5EcNaIC";s:6:"domain";s:25:"http://img.ganjinpai.com/";s:6:"bucket";s:9:"ganjinpai";s:3:"dir";s:12:"skydiveboao/";s:13:"uuploaddomain";s:24:"https://up-z2.qiniup.com";s:4:"udir";s:12:"skydiveboao/";s:8:"username";s:0:"";s:4:"port";s:0:"";s:8:"rootPath";s:0:"";s:8:"hosturls";s:0:"";s:13:"aly_accessKey";s:0:"";s:14:"aly_secrectKey";s:0:"";s:10:"aly_domain";s:0:"";s:10:"aly_bucket";s:0:"";s:7:"aly_dir";s:0:"";s:17:"aly_uuploaddomain";s:0:"";}

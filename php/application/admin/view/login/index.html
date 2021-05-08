@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh_cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>登录-{$system['sys_name']}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/static/admin/css/login.css" />
+    <link rel="stylesheet" href="/static/common/css/font.css" />
+</head>
+<body class="beg-login-bg">
+<div class="container login">
+    <div class="content">
+        <div id="large-header" class="large-header">
+            <canvas id="demo-canvas"></canvas>
+            <div class="main-title">
+                <div class="beg-login-box">
+                    <header>
+                        <h1 style="color: #fff;">{$system['sys_name']}登录</h1>
+                    </header>
+                    <div class="qrcode" style="display: none;">
+                        <img src="" style="width: 200px;height: 200px;margin: 30px 0 -30px 0;">
+                    </div>
+                    <div class="beg-login-main">
+                        <form class="layui-form layui-form-pane" method="post">
+                            <div class="layui-form-item">
+                                <label class="beg-login-icon fs1">
+                                    <span class="icon icon-user" style="font-size: 20px;position: relative;top: -6px;"></span>
+                                </label>
+                                <input type="text" name="username" lay-verify="required"  placeholder="这里输入登录名" value="" class="layui-input">
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="beg-login-icon fs1">
+                                    <i class="icon icon-key" style="font-size: 20px;position: relative;top: -6px;"></i>
+                                </label>
+                                <input type="password" name="password" lay-verify="required" placeholder="这里输入密码" value="" class="layui-input">
+                            </div>
+                            {if $system['code'] == 'open'}
+                            <div class="layui-form-item">
+                                <input type="text" name="vercode" id="captcha" autocomplete="off" lay-verify="required" placeholder="验证码" autocomplete="off" class="layui-input">
+                                <div class="captcha">
+                                    <img src="{:url('verify')}" alt="captcha" onclick="this.src='{:url("verify")}?'+'id='+Math.random()"/>
+                                </div>
+                            </div>
+                            {/if}
+                            <div class="sancode">
+                                <img src="/static/admin/images/sancode.png" /><span class="nohideText">扫码登录</span><span style="display: none;" class="hidetext">账号密码登录</span>
+                            </div>
+                            <div class="layui-form-item">
+                                <button type="submit" class="layui-btn btn-submit btn-blog" lay-submit lay-filter="login">登录</button>
+                            </div>
+                        </form>
+                    </div>
+                    <footer>
+                        <p>{$system['name']} © {:config('url_domain_root')}</p>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/admin/js/rAF.js"></script>
+<script src="/static/admin/js/login.js"></script>
+<script type="text/javascript" src="/static/layui/layui.js"></script>
+<script src="/static/common/js/jquery.2.1.1.min.js"></script>
+<script src="/static/common/js/request.js"></script>
+
+<script>
+    var timenum=1800,timefun,iscreatecodelogin= 0,createcodeloginid=0;
+    layui.use(['layer','form','request'],function(){
+        var form = layui.form,$ = layui.jquery;REQ=layui.request;
+        //监听提交
+        form.on('submit(login)', function(data){
+            var loading =layer.load(1, {shade: [0.1,'#fff'] });//0.1透明度的白色背景
+            REQ.post('{:url("index")}',data.field,function(res){
+                layer.close(loading);
+                if(res.code == 1){
+                    layer.msg(res.msg, {icon: 1, time: 1000}, function(){
+                        location.href = "{:url('index/index')}";
+                    });
+                }else{
+                    $('#captcha').val('');
+                    layer.msg(res.msg, {icon: 2, anim: 6, time: 1000});
+                    $('.captcha img').attr('src','{:url("verify")}?id='+Math.random());
+                }
+            });
+            return false;
+        });
+        $('.sancode').on('click', function() {
+            if(iscreatecodelogin){
+                $(".layui-form-item").toggle()
+                $(".nohideText").toggle()
+                $(".hidetext").toggle()
+                $(".qrcode").toggle()
+            }else{
+                REQ.post("{:url('createcodelogin')}",{time:"{:time()}"},function(json){
+                    if(json.code==1){
+                        iscreatecodelogin=1;
+                        createcodeloginid=json.id;
+                        $(".layui-form-item").toggle()
+                        $(".nohideText").toggle()
+                        $(".hidetext").toggle()
+                        $(".qrcode").html('<img src="'+json.url+'" style="width: 200px;height: 200px;margin: 30px 0 -30px 0;">')
+                        $(".qrcode").toggle()
+                        timefun=setInterval(timePay, 2000);
+                    }else{
+                        layer.msg(json.msg);
+                    }
+                });
+            }
+        });
+    })
+
+    function timePay() {
+        timenum -= 1;
+        if (timenum < 0) {
+            clearInterval(timefun);
+            layer.msg('二维码已失效,请刷新');
+        }
+        REQ.post("{:url('codelogin')}",{id:createcodeloginid},function(json){
+            if(json.code==1){
+                layer.msg(json.msg, {icon: 1, time: 1000}, function(){
+                    location.href = "{:url('admin/index/index')}";
+                });
+            }else if(json.code==2){
+                return false;
+            }else{
+                clearInterval(timefun);
+                layer.msg(json.msg);
+            }
+        });
+    }
+</script>
+</body>
+</html>

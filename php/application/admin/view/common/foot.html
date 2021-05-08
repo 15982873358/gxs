@@ -1,0 +1,23 @@
+<script type="text/javascript" src="/static/layui/layui.js"></script>
+<script>
+    function backClose(){
+        var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+        if(index){
+            parent.layer.close(index);
+        }else{
+            window.history.go(-1);
+        }
+    }
+    layui.use(['form', 'layer','element','request'], function () {
+        var $= layui.jquery;
+        $('body').on('mouseover','.js-thumb-img',function(){
+            var th=$(this);
+            var height=th.data('height')?th.data('height'):100;
+            layer.tips('<img src="'+th.attr('src')+'" style="max-width: 800px;max-height: '+height+'px">',th,{tips: [1, '#fff']});
+        });
+        $('body').on('mouseout','.js-thumb-img',function(){
+            layer.closeAll();
+        });
+    })
+
+</script>

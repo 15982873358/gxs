@@ -1,0 +1,155 @@
+{include file="common/head"/}
+<link rel="stylesheet" href="/static/layui/css/admin.css" media="all" />
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-sm6 layui-col-md6">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    用户量
+                    <span class="layui-badge layui-bg-blue layuiadmin-badge">今日活跃</span>
+                </div>
+                <div class="layui-card-body layuiadmin-card-list">
+                    <p class="layuiadmin-big-font">{$data['memberDayNum']}</p>
+                    <p>
+                        总用户
+                        <span class="layuiadmin-span-color">{$data['memberNum']}<i class="layui-inline layui-icon layui-icon-flag"></i></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-sm6 layui-col-md6">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    活动量
+                    <span class="layui-badge layui-bg-orange layuiadmin-badge">进行中</span>
+                </div>
+                <div class="layui-card-body layuiadmin-card-list">
+
+                    <p class="layuiadmin-big-font">{$data['activityWayNum']}</p>
+                    <p>
+                        总活动
+                        <span class="layuiadmin-span-color">{$data['activityNum']}<i class="layui-inline layui-icon layui-icon-user"></i></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-sm12">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    平台收支
+                    <div class="layui-btn-group layuiadmin-btn-group">
+                        <!--<a href="javascript:;" class="layui-btn layui-btn-primary layui-btn-xs">去年</a>-->
+                        <!--<a href="javascript:;" class="layui-btn layui-btn-primary layui-btn-xs">今年</a>-->
+                    </div>
+                </div>
+                <div class="layui-card-body">
+                    <div class="layui-row">
+                        <div class="layui-col-sm8">
+                            <div class="layui-carousel layadmin-carousel layadmin-dataview" data-anim="fade" lay-filter="LAY-index-pagetwo">
+                                <div id="eventContainer" style="height: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="layui-col-sm4">
+                            <div class="layui-card">
+                                <div class="layui-card-header">
+                                    待审核的活动
+                                    <span class="layui-badge layui-bg-orange layuiadmin-badge">总</span>
+                                </div>
+                                <div class="layui-card-body layuiadmin-card-list">
+                                    <table class="layui-table layuiadmin-page-table" lay-skin="line">
+                                        <thead>
+                                        <tr>
+                                            <th>活动名称</th>
+                                            <th>发布时间</th>
+                                            <th>发布者</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {volist name="data['activityList']" id="vo"}
+                                        <tr>
+                                            <td><span class="first"><a href="{$vo['url']}" target="_blank">{$vo['title']}</a></span></td>
+                                            <td><span>{:strtotime("m-d H:i",$vo['add_time'])}</span></td>
+                                            <td>{$vo['author']} <i class="layui-icon layui-icon-fire"></i></td>
+                                        </tr>
+                                        {/volist}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-main layui-anim layui-anim-upbit">
+
+</div>
+{include file="common/foot"/}
+<script type="text/javascript" src="/static/admin/js/echarts/echarts.min.js"></script>
+<script>
+    layui.use(['element','table'], function(){
+
+    });
+</script>
+<script type="text/javascript">
+
+
+    // 平台收益与支出
+    var eventChart = echarts.init(document.getElementById('eventContainer'));
+
+    // 指定图表的配置项和数据
+    var eventOption = {
+        title: {
+            text: '平台收支（月）',
+            left: 'center'
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b} : {c}'
+        },
+        legend: {
+            left: 'left',
+            data: ['收入','支出']
+        },
+        xAxis: {
+            type: 'category',
+            name: 'x',
+            splitLine: {show: false},
+            data:[]
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        yAxis: {
+            type: 'value'
+        },
+        dataZoom: [{
+            type: 'inside',
+            show: true, //flase直接隐藏图形
+            xAxisIndex: [0],
+            start: 0,//滚动条的起始位置
+            end: 100 //滚动条的截止位置（按比例分割你的柱状图x轴长度）
+        }],
+        series: [
+            {
+                name: '收入金额（元）',
+                type: 'line',
+                data: {$data['date']}
+            },
+            {
+                name: '支出金额（元）',
+                type: 'line',
+                data: {$data['orderAmount']}
+            }
+        ]
+    };
+    eventChart.setOption(eventOption);
+</script>
+</body>
+</html>

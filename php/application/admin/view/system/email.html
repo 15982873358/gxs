@@ -1,0 +1,67 @@
+{include file="common/head"/}
+<div class="admin-main layui-anim layui-anim-upbit">
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>邮箱配置</legend>
+    </fieldset>
+    <form class="layui-form layui-form-pane" lay-filter="form-email">
+        <div class="layui-form-item">
+            <label class="layui-form-label">SMTP服务器</label>
+            <div class="layui-input-4">
+                <input type="text" name="smtp_server" placeholder="SMTP服务器" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">端口</label>
+            <div class="layui-input-4">
+                <input type="text" name="smtp_port" placeholder="端口 - likely to be 25, 465 or 587" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">发送者邮箱</label>
+            <div class="layui-input-4">
+                <input type="text" name="smtp_user" placeholder="发送者邮箱" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮箱密码</label>
+            <div class="layui-input-4">
+                <input type="text" name="smtp_pwd" placeholder="SMTP对应的密码，非登录密码" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">发送者名称</label>
+            <div class="layui-input-4">
+                <input type="text" name="email_id"  placeholder="发送者名称" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="button" class="layui-btn" lay-submit="" lay-filter="submit">提 交</button>
+            </div>
+        </div>
+    </form>
+</div>
+{include file="common/foot"/}
+<script>
+    var infoJson = {$infoJson|raw};
+    layui.use(['form', 'layer'], function () {
+        var form = layui.form,layer = layui.layer,$= layui.jquery;
+        //回显渲染
+        form.val("form-email", infoJson)
+
+        //提交监听
+        form.on('submit(submit)', function (data) {
+            var loading =layer.load(1, {shade: [0.1,'#fff']});
+            $.post("{:url('system/email')}",data.field,function(res){
+                layer.close(loading);
+                if(res.code > 0){
+                    layer.msg(res.msg,{icon: 1, time: 1000});
+                }else{
+                    layer.msg(res.msg,{icon: 2, time: 1000});
+                }
+            });
+        })
+    })
+</script>
+</body>
+</html>

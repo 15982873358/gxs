@@ -1,0 +1,140 @@
+{include file="common/head"/}
+<div class="admin-main layui-anim layui-anim-upbit">
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>管理员列表</legend>
+    </fieldset>
+    <div class="demoTable">
+        <div class="layui-inline">
+            <input class="layui-input" name="keyword" id="keyword" placeholder="{:lang('pleaseEnter')}关键字">
+        </div>
+        <button class="layui-btn" id="search" data-type="reload">搜索</button>
+        <a href="{:url('index')}" class="layui-btn">显示全部</a>
+        <a href="{:url('index_add')}" class="layui-btn" style="float:right;"><i class="fa fa-plus" aria-hidden="true"></i>{:lang('add')}图片</a>
+    </div>
+    <table class="layui-table" id="list" lay-filter="list"></table>
+</div>
+<script type="text/html" id="status">
+    <input type="checkbox" name="status" value="{{d.id}}" lay-skin="switch" lay-text="有效|无效" lay-filter="status" {{ d.status == 1 ? 'checked' : '' }}>
+</script>
+<script type="text/html" id="action">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script type="text/html" id="titleImg">
+    {{# if(d.head_path){ }}<img src="{{d.head_path}}" class="list-img js-thumb-img" data-height="100" >{{# } }}
+    {{d.username}}
+</script>
+<script type="text/html" id="topBtn">
+    <button type="button" class="layui-btn layui-btn-danger layui-btn-sm" id="delAll">批量删除</button>
+</script>
+{include file="common/foot"/}
+<script>
+    layui.use(['table','form'], function() {
+        var table = layui.table,form = layui.form, $ = layui.jquery;
+        var tableIn = table.render({
+            id: 'user',
+            elem: '#list',
+            url: '{:url("index")}',
+            method: 'post',
+            toolbar: '#topBtn',
+            page: true,
+            cellMinWidth: 80, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            cols: [[
+                {checkbox:true,fixed: true},
+                {field: 'sort', title: '排序', edit: 'text', width: 80, sort: true},
+                {field: 'title', title: '标题名称', templet: '#titleImg', minWidth: 200},
+                {field: 'type', title: '显示位置', minWidth: 200},
+                {field: 'url', title: 'URL链接', minWidth: 200},
+                {field: 'status', align: 'center',title: '状态',toolbar: '#status'},
+                {field: 'add_time', title: '发布时间', minWidth: 200},
+                {minWidth: 300, align: 'center', toolbar: '#action'}
+            ]],
+            limit: 10 //每页默认显示的数量
+        });
+        form.on('switch(status)', function(obj){
+            var loading =layer.load(1, {shade: [0.1,'#fff']});
+            var id = this.value;
+            var status = obj.elem.checked===true?1:0;
+            $.post('{:url("index_status")}',{'id':id,'status':status},function (res) {
+                layer.close(loading);
+                if (res.code!=1) {
+                    layer.msg(res.msg,{time:1000,icon:2});
+                }
+            })
+        });
+        //监听单元格编辑
+        table.on('edit(list)', function(obj){
+            var value = obj.value //得到修改后的值
+                    ,data = obj.data //得到所在行所有键值
+                    ,field = obj.field; //得到字段
+            $.post('{:url("index_field_edit")}',{'id': data.id ,'field':field,'value':value},function (res) {
+                if (res.code!=1) {
+                    layer.msg(res.msg,{time:1000,icon:2});
+                }
+            });
+        });
+        //操作
+        table.on('tool(list)', function(obj) {
+            var data = obj.data;
+            //删除
+            if (obj.event === 'del'){
+                layer.confirm('您确定要删除吗？删除后将无法找回', function(index){
+                    var loading = layer.load(1, {shade: [0.1, '#fff']});
+                    $.post("{:url('index_del')}",{id:data.id},function(res){
+                        layer.close(loading);
+                        if(res.code===1){
+                            layer.msg(res.msg,{time:1000,icon:1});
+                            tableIn.reload();
+                        }else{
+                            layer.msg('操作失败！',{time:1000,icon:2});
+                        }
+                    });
+                    layer.close(index);
+                });
+            }
+            //编辑
+            if (obj.event === 'edit'){
+                var title=obj.data.title+"的信息";
+                var edit=layer.open({
+                    type: 2,
+                    area: ['100%', '100%'],
+                    fixed: false,
+                    title:title,
+                    maxmin: true,
+                    content: "{:url('index_edit')}?id="+data.id,
+                    end : function() {
+                        tableIn.reload();
+                    }
+                });
+            }
+        });
+        //搜索
+        $('#search').on('click', function() {
+            var keyword = $('#keyword').val();
+            var type = $('#type').val();
+            tableIn.reload({ page: {curr: 1},where: {keyword: keyword,type:type}});
+        });
+        $('body').on('click','#delAll',function() {
+            layer.confirm('确认要删除选中信息吗？', {icon: 3}, function(index) {
+                layer.close(index);
+                var checkStatus = table.checkStatus('user'); //test即为参数id设定的值
+                var ids = [];
+                $(checkStatus.data).each(function (i, o) {
+                    ids.push(o.id);
+                });
+                var loading = layer.load(1, {shade: [0.1, '#fff']});
+                $.post("{:url('index_del')}", {ids: ids}, function (data) {
+                    layer.close(loading);
+                    if (data.code === 1) {
+                        layer.msg(data.msg, {time: 1000, icon: 1});
+                        tableIn.reload();
+                    } else {
+                        layer.msg(data.msg, {time: 1000, icon: 2});
+                    }
+                });
+            });
+        })
+    });
+</script>
+</body>
+</html>

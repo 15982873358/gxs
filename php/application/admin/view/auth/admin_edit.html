@@ -1,0 +1,121 @@
+{include file="common/head"/}
+<div class="admin-main layui-anim layui-anim-upbit">
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend><a type="button"  onclick="backClose()"   class="layui-btn layui-btn-primary layui-btn-sm"><i class="layui-icon"></i></a>&nbsp;{$title}</legend>
+    </fieldset>
+    <form class="layui-form layui-form-pane" lay-filter="form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属用户组</label>
+            <div class="layui-input-4">
+                <select name="group_id" lay-verify="required">
+                    <option value="">请选择用户组</option>
+                    {volist name="authGroup" id="vo"}
+                    <option value="{$vo.group_id}">{$vo.title}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-4">
+                <input type="text" name="username" lay-verify="required" placeholder="请输入登录用户名" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                建议用户名在4到25个字符之间。
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">登录密码</label>
+            <div class="layui-input-4">
+                <input type="password" name="pwd" placeholder="请输入登录密码" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                建议密码大于6位，小于15位。
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">头像</label>
+            <input type="hidden" name="head_path" id="head_path" value="{{field.head_path}}">
+            <div class="layui-input-block">
+                <div class="layui-upload">
+                    <button type="button" class="layui-btn layui-btn-primary" id="head_path_btn"><i class="icon icon-upload3"></i>点击上传图片</button>
+                    <div class="layui-inline layui-word-aux" >
+                      建议：尺寸200*200px 大小1M内
+                    </div>
+                    <div class="layui-upload-list">
+                        <img class="layui-upload-img js-thumb-img" id="head_path_img"  src="{{field.head_path}}" data-height="500" >
+                        <p id="head_path_text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮箱</label>
+            <div class="layui-input-4">
+                <input type="text" name="email" lay-verify="email" value="" placeholder="请输入邮箱" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                *保存成功后帐号密码将会发送至此邮箱
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <input type="hidden" name="admin_id">
+                <button type="button" class="layui-btn" lay-submit="" lay-filter="submit">{:lang('submit')}</button>
+                <a onclick="backClose();" class="layui-btn layui-btn-primary">{:lang('back')}</a>
+            </div>
+        </div>
+    </form>
+</div>
+{include file="common/foot"/}
+<script>
+    var infoJson = {$infoJson|raw};
+    layui.use(['form', 'layer','upload','request'], function () {
+        var form = layui.form, layer = layui.layer,$= layui.jquery,upload = layui.upload,request = layui.request;
+        form.val("form", infoJson);
+        $('#head_path_img').attr('src',seytem.head_path);
+        //小程序图片上传
+        var head_path_upload = upload.render({
+            elem: '#head_path_btn'
+            ,url: '{:url("UpFiles/upload")}'
+            ,before: function(obj){
+                //预读本地文件示例，不支持ie8
+                obj.preview(function(index, file, result){
+                    $('#head_path_img').attr('src', result); //图片链接（base64）
+                    $('#head_path_text').html("正在上传");
+                });
+            }
+            ,done: function(res){
+                //上传成功
+                if(res.code>0){
+                    $('#head_path').val(res.url);
+                    $('#head_path_text').html("上传成功");
+                }else{
+                    //如果上传失败
+                    return layer.msg('上传失败');
+                }
+            }
+            ,error: function(){
+                //演示失败状态，并实现重传
+                var head_path_text = $('#head_path_text');
+                head_path_text.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-mini img-reload">重试</a>');
+                head_path_text.find('.img-reload').on('click', function(){
+                    head_path_upload.upload();
+                });
+            }
+        });
+        form.on('submit(submit)', function (data) {
+            var loading =layer.load(1, {shade: [0.1,'#fff']});
+            request.post("", data.field, function (res) {
+                layer.close(loading);
+                if (res.code > 0) {
+                    layer.msg(res.msg, {time: 1800, icon: 1}, function () {
+                        backClose();
+                    });
+                } else {
+                    layer.msg(res.msg, {time: 1800, icon: 2});
+                }
+            });
+        });
+    });
+</script>

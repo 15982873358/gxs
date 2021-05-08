@@ -1,0 +1,49 @@
+{include file="common/head"/}
+<div class="admin-main layui-anim layui-anim-upbit">
+    <fieldset class="layui-elem-field layui-field-title">
+        <legend>操作日志</legend>
+    </fieldset>
+    <div class="demoTable">
+        <div class="layui-inline">
+            <input class="layui-input" name="keyword" id="keyword" placeholder="{:lang('pleaseEnter')}关键字">
+        </div>
+        <button class="layui-btn" id="search" data-type="reload">搜索</button>
+        <a href="{:url('index')}" class="layui-btn">显示全部</a>
+    </div>
+    <table class="layui-table" id="list" lay-filter="list"></table>
+</div>
+<script type="text/html" id="adminImg">
+    {{# if(d.avatar){ }}<img src="{{d.avatar}}" style="display: inline-block;width:20px;height:20px;" onmouseover="layer.tips('<img src=\'{{d.avatar}}\' style=\'max-width: 100px;max-height: 100px\'>',this,{tips: [1, '#fff']});" onmouseout="layer.closeAll();">{{# } }}
+    {{d.username}}
+</script>
+{include file="common/foot"/}
+<script>
+    layui.use(['table','form'], function() {
+        var table = layui.table,form = layui.form, $ = layui.jquery;
+        var tableIn = table.render({
+            id: 'user',
+            elem: '#list',
+            url: '{:url("adminLog")}',
+            method: 'post',
+            page: true,
+            cols: [[
+                {field: 'username', title: '管理员', templet: '#adminImg', width: 200},
+                {field: 'msg', title: '说明',width: 400},
+                {field: 'ip', title: 'IP', width: 200},
+                {field: 'add_time', title: '时间', width: 200},
+            ]],
+            limit: 10 //每页默认显示的数量
+        });
+        //搜索
+        $('#search').on('click', function() {
+            var keyword = $('#keyword').val();
+            if($.trim(keyword)==='') {
+                layer.msg('{:lang("pleaseEnter")}关键字！',{icon:0});
+                return;
+            }
+            tableIn.reload({ page: {page: 1},where: {keyword: keyword}});
+        });
+    });
+</script>
+</body>
+</html>

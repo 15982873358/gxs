@@ -1,0 +1,34 @@
+{include file="common/head"/}
+<div class="admin-main layui-anim layui-anim-upbit" ng-app="hd" ng-controller="ctrl">
+    <ul class="layui-timeline">
+        {volist name='list' id="vo"}
+        <li class="layui-timeline-item">
+            <i class="layui-icon layui-timeline-axis"></i>
+            <div class="layui-timeline-content layui-text">
+                <h3 class="layui-timeline-title">{:date('m月d日 H:i',$vo['add_times'])} <span class="layui-badge layui-bg-orange">{:$vo['title']}</span></h3>
+                <p>
+                    {:$vo['msg']}
+                </p>
+            </div>
+        </li>
+        {/volist}
+        {if count($list)>10}
+        <li class="layui-timeline-item">
+            <i class="layui-icon layui-timeline-axis"></i>
+            <div class="layui-timeline-content layui-text">
+                <div class="layui-timeline-title">很久很久以前...</div>
+            </div>
+        </li>
+        {else/}
+        <li class="layui-timeline-item">
+            <i class="layui-icon layui-timeline-axis"></i>
+            <div class="layui-timeline-content layui-text">
+                <div class="layui-timeline-title">没有消息了</div>
+            </div>
+        </li>
+        {/if}
+    </ul>
+</div>
+{include file="common/foot"/}
+</body>
+</html>
